@@ -2,6 +2,7 @@ package ru.kata.spring.boot_security.demo.services;
 
 //import org.springframework.security.core.userdetails.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,12 +21,15 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
+@Lazy
 public class UserServiceImpl implements UserService, UserDetailsService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
 
@@ -87,16 +91,23 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public User changePasswordIfNew(User user) {
-/*        String oldPassword = findUserById(user.getId()).getPassword();
+    @Transactional
+    public boolean changePasswordIfNew(User user) {
+        String oldPassword = findUserById(user.getId()).getPassword();
         String newPassword = user.getPassword();
 
         if (passwordEncoder.matches(newPassword, oldPassword) || oldPassword.equals(newPassword)) {
             user.setPassword(oldPassword);
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }*/
-        return user;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean setPassord(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return true;
     }
 
 

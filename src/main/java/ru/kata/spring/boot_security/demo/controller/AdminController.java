@@ -20,12 +20,10 @@ public class AdminController {
 
     private final UserService userService;
     private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
 
-    public AdminController(UserServiceImpl userService, RoleService roleService, PasswordEncoder passwordEncoder) {
+    public AdminController(UserServiceImpl userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping(value = "")
@@ -44,8 +42,7 @@ public class AdminController {
     @PostMapping(value = "/addUser")
     public String addUser(@ModelAttribute("user") User user) {
         roleService.setRoles(user);
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userService.setPassord(user);
         userService.saveUser(user);
         return "redirect:/admin";
     }
@@ -62,16 +59,7 @@ public class AdminController {
     @PostMapping(value = "/editUser")
     public String editUser(@ModelAttribute("user") User user) {
         roleService.setRoles(user);
-
-        String oldPassword = userService.findUserById(user.getId()).getPassword();
-        String newPassword = user.getPassword();
-
-        //User newUser = userService.changePasswordIfNew(user);
-        if (passwordEncoder.matches(newPassword, oldPassword) || oldPassword.equals(newPassword)) {
-            user.setPassword(oldPassword);
-        } else {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
+        userService.changePasswordIfNew(user);
 
         userService.updateUser(user);
         return "redirect:/admin";

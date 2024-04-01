@@ -16,5 +16,7 @@ public interface UserService {
     void updateUser(User user);
 
 
-    User changePasswordIfNew(User user);
+    boolean changePasswordIfNew(User user);
+
+    boolean setPassord(User user);
 }
